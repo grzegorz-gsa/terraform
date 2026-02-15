@@ -1,0 +1,109 @@
+### DevOps 15.02 - Terraform ###
+
+https://code.visualstudio.com/
+
+
+### TERRAFORM - automatyzacja infrastruktury chmurowej ###
+
+Narzędzie typu IaC
+
+### instalacja ###
+
+https://developer.hashicorp.com/terraform
+
+wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install terraform
+
+
+### plik main.tf w visual studio ###
+
+terraform {
+  required_providers {
+    local = {
+      source = "hashicorp/local"
+      version = "2.6.2"
+    #   version = "~> 2.6"
+    }
+  }
+}
+
+resource "local_file" "powitanie" {
+    content  = "Witaj świecie! Drugi raz!"
+    filename = "${path.module}/powitanie.txt"  
+}
+
+resource "local_file" "notatka" {
+    content  = <<EOT
+To jest nowa notatka.
+Dowolny tekst.
+EOT
+    filename = "${path.module}/notatka.txt"  
+}
+
+
+### plik variable.tf w visual studio ###
+
+variable "imie" {
+  description = "Imię użytkownika"
+  type        = string
+  default     = "Jan"
+}
+
+variable "miasto" {
+  type = string
+}
+
+variable "wiek" {
+  type = number
+  default = 30
+}
+
+variable "czy_studiuje" {
+  type = bool
+  default = false
+}
+
+variable "ulubione_kolory" {
+  type = list(string)
+  default = ["niebieski", "zielony"]
+}
+
+variable "adres" {
+  type = map(string)
+  default = {
+    ulica = "Kwiatowa 5"
+    miasto = "Warszawa"
+    kod_pocztowy = "00-001"
+  }
+}
+
+variable "sekretny_klucz" {
+  type = string
+  sensitive = true
+}
+
+
+### plik .gitignore w visual studio (zawsze powinien być, żeby nie wysyłał do gita) ###
+
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+*.tfvars
+*.tfplan.out
+
+
+### plik outputs.tf w visual studio ###
+
+output "sciezka_do_pliku_lokalnego" {
+  description = "gdzie jest plik"
+  value = local_file.powitanie.filename
+}
+
+output "zawartosc_pliku_lokalnego" {
+  description = "co jest w pliku"
+  value = local_file.powitanie.content
+}
+
+
